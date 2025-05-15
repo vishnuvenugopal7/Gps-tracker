@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    input, button {
+      padding: 12px;
+      margin: 10px 0;
+      width: 100%;
+      font-size: 16px;
+    }
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h2>📍 Real-Time Location Capture</h2>
+  
+  <input type="text" id="locationpin" placeholder="Enter custom label (e.g., Store Name)">
+  
+  <button onclick="getLocation()">📡 Capture My Location</button>
+  
+  <p id="status"></p>
+
+  <script>
+    function getLocation() {
+      const locationpin = document.getElementById("locationpin").value.trim();
+      const status = document.getElementById("status");
+
+      if (!locationpin) {
+        status.textContent = "⚠️ Please enter a location label.";
+        status.style.color = "red";
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        status.textContent = "❌ Geolocation is not supported by your browser.";
+        status.style.color = "red";
+        return;
+      }
+
+      status.textContent = "🔄 Requesting location access...";
+      status.style.color = "orange";
+
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          google.script.run.withSuccessHandler(function(response) {
+            status.textContent = response;
+            status.style.color = "green";
+          }).saveCoordinates(lat, lng, locationpin);
+        },
+        function(error) {
+          status.textContent = "⚠️ Location access denied or failed: " + error.message;
+          status.style.color = "red";
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    }
+  </script>
+</body>
+</html>
